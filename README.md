@@ -2,7 +2,8 @@
 
 A minimal AI chatbot powered by Groq and Tavily web search. Ask anything — Anubhavi answers from its own knowledge or searches the internet in real time when needed.
 
-![Anubhavi Chat UI](https://placehold.co/800x400/4c1d95/ffffff?text=Anubhavi+Chatbot)
+![Anubhavi Chat UI](assets/preview.png)
+
 
 ## Features
 
