@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chatbot</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+      .md-body h1, .md-body h2, .md-body h3 { font-weight: 700; margin: 0.5rem 0; }
+      .md-body h1 { font-size: 1.4rem; }
+      .md-body h2 { font-size: 1.2rem; }
+      .md-body h3 { font-size: 1rem; }
+      .md-body p { margin: 0.4rem 0; }
+      .md-body ul, .md-body ol { padding-left: 1.25rem; margin: 0.4rem 0; }
+      .md-body li { margin: 0.2rem 0; }
+      .md-body strong { font-weight: 700; }
+      .md-body em { font-style: italic; }
+      .md-body hr { border-color: rgba(255,255,255,0.2); margin: 0.5rem 0; }
+      .md-body table { border-collapse: collapse; width: 100%; margin: 0.5rem 0; }
+      .md-body th, .md-body td { border: 1px solid rgba(255,255,255,0.3); padding: 0.3rem 0.6rem; }
+
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20%, 60% { transform: translateX(-6px); }
+        40%, 80% { transform: translateX(6px); }
+      }
+      .shake { animation: shake 0.35s ease; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  </head>
+  <body class="bg-violet-900 text-white overflow-x-hidden">
+    <div id="offline-banner" class="hidden fixed top-0 inset-x-0 z-50 bg-red-600 text-white text-center text-sm py-2">
+      Server is offline. Please start the backend.
+    </div>
+    <div id="chat-container" class="container mx-auto max-w-3xl pb-48 px-2 pt-6">
+      <div
+        class="fixed inset-x-0 bottom-4 flex items-center justify-center bg-violet-900 px-2"
+      >
+        <div id="input-box" class="bg-rose-100 p-2 rounded-3xl w-full max-w-3xl">
+          <textarea
+            id="input"
+            placeholder="Ask me anything..."
+            class="w-full resize-none outline-0 p-3 text-black bg-transparent placeholder-gray-400 max-h-40 overflow-y-auto"
+            rows="1"
+          ></textarea>
+          <div class="flex items-center justify-between px-1">
+            <span class="text-gray-400 text-xs">Enter to send · Shift+Enter for new line</span>
+            <div class="flex items-center gap-2">
+              <span id="char-count" class="text-gray-400 text-xs">0 / 500</span>
+              <button
+                id="ask"
+                class="bg-white px-4 py-1 text-black rounded-full cursor-pointer hover:bg-violet-300 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
+              >
+                Ask
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="./script.js"></script>
+  </body>
+</html>

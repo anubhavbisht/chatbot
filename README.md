@@ -1,98 +1,132 @@
-# LLM Invoke — AI Chat Assistant with Web Search
+# Anubhavi — AI Chat Assistant
 
-An interactive command-line AI assistant that can search the web in real time to answer your questions. Built with **Groq** (LLM) and **Tavily** (web search).
+A minimal AI chatbot powered by Groq and Tavily web search. Ask anything — Anubhavi answers from its own knowledge or searches the internet in real time when needed.
 
-## What it does
+![Anubhavi Chat UI](https://placehold.co/800x400/4c1d95/ffffff?text=Anubhavi+Chatbot)
 
-You chat with the assistant in your terminal. When a question needs up-to-date information (news, prices, recent events), the assistant automatically searches the web and uses those results to answer you — all in one conversation.
+## Features
+
+- Real-time web search via Tavily when the answer needs up-to-date information
+- Multi-turn conversation memory per session (persisted across page refreshes)
+- Markdown rendering for structured responses (tables, lists, headings, bold)
+- Typing indicator while the model is thinking
+- 500-character input limit with live counter
+- Server health banner if the backend is offline
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | Vanilla JS, Tailwind CSS v4, Marked.js |
+| Backend | Node.js, Express |
+| LLM | Groq API (`openai/gpt-oss-20b`) |
+| Web Search | Tavily API |
+| Session Cache | node-cache (in-memory, 24h TTL) |
+
+## Project Structure
 
 ```
-You:: When was the iPhone 16 launched?
-[webSearch] "iPhone 16 launch date"
-Assistant:: The iPhone 16 was launched on September 9, 2024...
-
-You:: What about its price?
-Assistant:: The iPhone 16 starts at $799...
+chatgpt-mini/
+├── backend/
+│   └── index.js        # Express server, /chat endpoint
+├── frontend/
+│   ├── index.html      # UI markup
+│   └── script.js       # Chat logic, DOM, localStorage
+├── llm/
+│   └── index.js        # Groq tool-call loop + Tavily web search
+├── .env.example        # Required environment variables
+└── package.json
 ```
 
-The assistant remembers everything said earlier in the session, so you can ask follow-up questions naturally.
+## Getting Started
 
-## How it works (the agentic loop)
-
-This project implements a pattern called an **agentic loop** — a core concept in AI engineering:
-
-```
-User message
-     ↓
-  LLM decides: do I need more info?
-     ↓              ↓
-   YES             NO
-  Call tool      Reply to user
-  (webSearch)        ↓
-     ↓            Done
-  Feed result
-  back to LLM
-     ↓
-  (repeat)
-```
-
-The LLM (language model) is given a set of tools it can call. If it decides a tool is needed, your code runs the tool and sends the result back. This loop continues until the LLM has everything it needs to answer.
-
-## Prerequisites
-
-- [Node.js](https://nodejs.org/) v18 or higher
-- A [Groq API key](https://console.groq.com/) — free tier available
-- A [Tavily API key](https://tavily.com/) — free tier available
-
-## Setup
-
-1. **Clone the repo**
-   ```bash
-   git clone <your-repo-url>
-   cd llm-invoke
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Create a `.env` file** in the project root:
-   ```
-   GROQ_API_KEY=your_groq_api_key_here
-   TAVILY_API_KEY=your_tavily_api_key_here
-   ```
-
-## Run
+### 1. Clone the repo
 
 ```bash
-node app.js
+git clone <your-repo-url>
+cd chatgpt-mini
 ```
 
-Type your question and press Enter. Type `exit` to quit.
-
-## Project structure
-
-```
-llm-invoke/
-├── app.js        # All application logic
-├── .env          # API keys (never commit this)
-├── package.json
-└── README.md
-```
-
-## Tech stack
-
-| Tool | Purpose |
-|---|---|
-| [Groq SDK](https://github.com/groq/groq-node) | Fast LLM inference (runs the AI model) |
-| [Tavily](https://tavily.com/) | Real-time web search API |
-| [dotenv](https://github.com/motdotla/dotenv) | Loads API keys from `.env` file |
-
-## Important: keep your API keys safe
-
-Never commit your `.env` file to git. Add it to `.gitignore`:
+### 2. Install dependencies
 
 ```bash
-echo ".env" >> .gitignore
+npm install
 ```
+
+### 3. Set up environment variables
+
+```bash
+cp .env.example .env
+```
+
+Open `.env` and fill in your API keys:
+
+```env
+GROQ_API_KEY=your_groq_api_key
+TAVILY_API_KEY=your_tavily_api_key
+```
+
+- Get a Groq key: https://console.groq.com
+- Get a Tavily key: https://app.tavily.com
+
+### 4. Start the backend
+
+```bash
+npm start
+```
+
+The server starts at `http://localhost:3000`.
+
+### 5. Open the frontend
+
+Open `frontend/index.html` directly in your browser, or serve it with any static file server:
+
+```bash
+npx serve frontend
+```
+
+## API
+
+### `POST /chat`
+
+Sends a message and returns the AI response.
+
+**Request body**
+```json
+{
+  "message": "Who is the PM of India?",
+  "threadId": "abc123"
+}
+```
+
+**Response**
+```json
+{
+  "status": "SUCCESS",
+  "result": "The current Prime Minister of India is Narendra Modi..."
+}
+```
+
+**Error response**
+```json
+{
+  "status": "FAILURE",
+  "result": "Server error"
+}
+```
+
+## How It Works
+
+1. The frontend sends the user's message along with a `threadId` (stored in `localStorage`) to the backend.
+2. The backend calls `askLLM` in the LLM layer with the message and thread ID.
+3. `askLLM` loads the conversation history for that thread from the in-memory cache, then runs a tool-call loop with the Groq model (up to 10 turns).
+4. If the model decides it needs real-time data, it calls `webSearch` via Tavily and feeds the results back into the conversation.
+5. Once the model produces a final text response, it's saved back to the cache and returned to the frontend.
+6. The frontend renders the response as Markdown.
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `GROQ_API_KEY` | API key for Groq LLM inference |
+| `TAVILY_API_KEY` | API key for Tavily web search |
